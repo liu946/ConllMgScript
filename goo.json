@@ -1,0 +1,11 @@
+{
+  "name": "ConllMgScript",
+  "command": {
+    "test": "echo no testing script",
+    "raw": "awk '{if(NF==0){if(p==0)printf(\"\\n\");p=1;} else if ($1==\"#\") {} else {p=0;printf(\"%s\", $2)}}' data/source_data > data/raw.txt",
+    "seg": "/Users/liu/project/csir/hit_csir_ltp/bin/examples/cws_cmdline --segmentor-model /Users/liu/project/csir/hit_csir_ltp/ltp_data/cws.model --input data/raw.txt --threads 4 > data/seg.txt",
+    "pos": "/Users/liu/project/csir/hit_csir_ltp/bin/examples/pos_cmdline --postagger-model /Users/liu/project/csir/hit_csir_ltp/ltp_data/pos.model --input data/seg.txt --threads 4 > data/pos.txt",
+    "par": "/Users/liu/project/csir/hit_csir_ltp/bin/examples/par_cmdline --parser-model /Users/liu/project/csir/hit_csir_ltp/ltp_data/parser.model --input data/pos.txt --threads 4 > data/par.txt",
+    "toconll": "awk 'BEGIN {idx=1} {if(NF==0){idx=1;printf(\"\\n\")}else{printf(\"%d\\t%s\\t_\\t_\\t%s\\t_\\t%s\\t%s\\t_\\t_\\n\",idx++, $1, $2, $3, $4)}}' data/par.txt > data/tar.conll"
+  }
+}
