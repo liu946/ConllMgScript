@@ -35,6 +35,7 @@ class Filter(SubCommand):
         sub_parser.add_argument('output_file', help='output path.')
         sub_parser.add_argument('--remain_file', default=None, help='output source sentence not in filter file.')
         sub_parser.add_argument('--not_fit_filters', default=None, help='output filter sentence not in source file.')
+        sub_parser.add_argument('')
 
     @staticmethod
     def process(argv):
@@ -55,6 +56,7 @@ class Filter(SubCommand):
                     del source_string[key]
                     counter.update(['in_filter_sentence'])
                 else:
+                    not_fit_filters.append(sentence)
                     counter.update(['not_in_filter_sentence'])
         if argv.remain_file is not None:
             with codecs.open(argv.remain_file, 'w', encoding='utf8') as fremain:
