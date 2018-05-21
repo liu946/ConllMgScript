@@ -8,7 +8,6 @@ from collections import Counter
 
 from structure.word import SentenceAsTree
 from structure.data_iter import *
-from contextlib import ExitStack
 
 
 class SubCommand(object):
