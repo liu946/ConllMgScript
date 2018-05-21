@@ -52,9 +52,15 @@ class Rule(object):
 
     @staticmethod
     def suture_parent(parent, child_list):
-        parent.children = child_list
+        parent.children += child_list
         for c in child_list:
             c.parent = parent
+
+    @staticmethod
+    def change_child(parent, from_child, to_child):
+        index = parent.children.index(from_child)
+        parent.children[index] = to_child
+        to_child.parent = parent
 
 
 class MergeRule(Rule):
@@ -66,9 +72,10 @@ class MergeRule(Rule):
         if len(tar_olist) == 1 and not (self.find_head(source_olist) == -1):
             core = source_olist[self.find_head(source_olist)]
             new_word = WordWithRel.construct_with_args(0, tar_olist[0].word, core.parent, core.rel)
+            self.change_child(core.parent, core, new_word)
             self.suture_word_wise(source_olist[0].pre, new_word)
             self.suture_word_wise(new_word, source_olist[-1].next)
-            self.suture_parent(new_word, reduce(lambda x, y: x + y, [w.children for w in source_olist]))
+            self.suture_parent(new_word, reduce(lambda x, y: x + y, [list(filter(lambda c:c not in source_olist, w.children)) for w in source_olist], []))
             return True
         return False
 
@@ -86,11 +93,14 @@ class SplitRule(Rule):
                 if not i == 0:
                     self.suture_word_wise(new_words[i - 1], w)
                 if i == core_index:
-                    w.parent = source_olist[0].parent
+                    self.change_child(source_olist[0].parent, source_olist[0], w)
                     w.rel = source_olist[0].rel
                     self.suture_parent(w, source_olist[0].children)
                 else:
-                    w.parent = new_words[tar_olist.index(tar_olist[i].parent)]
+                    parent = new_words[tar_olist.index(tar_olist[i].parent)]
+                    w.parent = parent
+                    parent.children += [w]
+
             self.suture_word_wise(source_olist[0].pre, new_words[0])
             self.suture_word_wise(new_words[-1], source_olist[0].next)
             return True
