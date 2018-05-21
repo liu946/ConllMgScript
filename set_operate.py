@@ -34,11 +34,13 @@ class Filter(SubCommand):
         sub_parser.add_argument('filter_file', help='only in this file will be output.')
         sub_parser.add_argument('output_file', help='output path.')
         sub_parser.add_argument('--remain_file', default=None, help='output source sentence not in filter file.')
+        sub_parser.add_argument('--not_fit_filters', default=None, help='output filter sentence not in source file.')
 
     @staticmethod
     def process(argv):
         source_string = {}
         counter = Counter()
+        not_fit_filters = []
         for stn in conll_sentence_iter(argv.input_file):
             sentence = SentenceAsTree(stn)
             source_string[sentence.plain_hash()] = sentence
@@ -54,10 +56,14 @@ class Filter(SubCommand):
                     counter.update(['in_filter_sentence'])
                 else:
                     counter.update(['not_in_filter_sentence'])
-            if argv.remain_file is not None:
-                with codecs.open(argv.remain_file, 'w', encoding='utf8') as fremain:
-                    for stn in source_string.values():
-                        fremain.write(stn.conll_str() + '\n')
+        if argv.remain_file is not None:
+            with codecs.open(argv.remain_file, 'w', encoding='utf8') as fremain:
+                for stn in source_string.values():
+                    fremain.write(stn.conll_str() + '\n')
+        if argv.not_fit_filters is not None:
+            with codecs.open(argv.not_fit_filters, 'w', encoding='utf8') as ffilters:
+                for stn in not_fit_filters:
+                    ffilters.write(stn.conll_str() + '\n')
         print(counter)
 
 
