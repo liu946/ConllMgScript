@@ -35,6 +35,8 @@ class Filter(SubCommand):
         sub_parser.add_argument('output_file', help='output path.')
         sub_parser.add_argument('--remain_file', default=None, help='output source sentence not in filter file.')
         sub_parser.add_argument('--not_fit_filters', default=None, help='output filter sentence not in source file.')
+        sub_parser.add_argument('--force', action='store_true',
+                                help='filter not in source will output filter sentence. So output.size = filter.size')
 
     @staticmethod
     def process(argv):
@@ -57,6 +59,8 @@ class Filter(SubCommand):
                 else:
                     not_fit_filters.append(sentence)
                     counter.update(['not_in_filter_sentence'])
+                    if argv.force:
+                        fo.write(sentence.conll_str() + '\n')
         if argv.remain_file is not None:
             with codecs.open(argv.remain_file, 'w', encoding='utf8') as fremain:
                 for stn in source_string.values():
