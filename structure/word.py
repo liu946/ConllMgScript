@@ -120,6 +120,10 @@ class Sentence(object):
     def plain(self):
         return ''.join([str(w) for w in self.iter_item()])
 
+    def plain_hash(self):
+        return hash(self.plain())
+
+
 class SentenceAsTree(Sentence):
 
     def __init__(self, stn):

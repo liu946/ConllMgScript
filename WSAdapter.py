@@ -10,6 +10,7 @@ import sys
 from functools import reduce
 from collections import Counter
 from structure.word import SentenceAsTree, SentenceAsList, PlainWord, WordWithRel
+from structure.data_iter import *
 import codecs
 
 
@@ -170,28 +171,6 @@ class Adapter(object):
                     return self.adapt(self.source.root.next, self.target.root.next, deep + 1)
             else:
                 return self.adapt(source_list[-1].next, tar_list[-1].next, deep + 1)
-
-
-def conll_sentence_iter(filename):
-    with codecs.open(filename, encoding='utf8') as fi:
-        lines = []
-        for i in fi:
-            i = i.strip()
-            if (i == '' or i.startswith('#')) and len(lines):
-                yield lines
-                lines = []
-            elif not (i == '' or i.startswith('#')):
-                lines.append(i.split('\t'))
-        if len(lines):
-            yield lines
-
-
-def ws_sentence_iter(filename):
-    with codecs.open(filename, encoding='utf8') as fi:
-        for i in fi:
-            i = i.strip()
-            if not i == '':
-                yield i.split('\t')
 
 
 if __name__ == '__main__':
