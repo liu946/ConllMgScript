@@ -4,12 +4,14 @@
 
 import argparse
 import codecs
+from collections import Counter
+
 from structure.word import SentenceAsTree
 from structure.data_iter import *
+from contextlib import ExitStack
 
 
 class SubCommand(object):
-
     def __init__(self, sub_parser):
         pass
 
@@ -32,19 +34,33 @@ class Filter(SubCommand):
         sub_parser.add_argument('input_file', help='conll file to be filtered.')
         sub_parser.add_argument('filter_file', help='only in this file will be output.')
         sub_parser.add_argument('output_file', help='output path.')
+        sub_parser.add_argument('--remain_file', default=None, help='output source sentence not in filter file.')
 
     @staticmethod
     def process(argv):
         source_string = {}
+        counter = Counter()
         for stn in conll_sentence_iter(argv.input_file):
             sentence = SentenceAsTree(stn)
             source_string[sentence.plain_hash()] = sentence
+            counter.update(['source_sentence'])
         with codecs.open(argv.output_file, 'w', encoding='utf8') as fo:
             for filter_stn in conll_sentence_iter(argv.filter_file):
                 sentence = SentenceAsTree(filter_stn)
                 key = sentence.plain_hash()
+                counter.update(['filter_sentence'])
                 if key in source_string:
                     fo.write(source_string[key].conll_str() + '\n')
+                    del source_string[key]
+                    counter.update(['in_filter_sentence'])
+                else:
+                    counter.update(['not_in_filter_sentence'])
+            if argv.remain_file is not None:
+                with codecs.open(argv.remain_file, 'w', encoding='utf8') as fremain:
+                    for stn in source_string.values():
+                        fremain.write(stn.conll_str() + '\n')
+        print(counter)
+
 
 if __name__ == '__main__':
     enabled_command_classes = [Filter]
@@ -58,4 +74,3 @@ if __name__ == '__main__':
     process_obj = args.process_obj
     del args.process_obj
     process_obj.process(args)
-
